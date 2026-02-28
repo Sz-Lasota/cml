@@ -1,0 +1,9 @@
+# Build
+build/
+dist/
+
+# Envs
+.env
+
+# Resources
+res/
