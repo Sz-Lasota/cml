@@ -1,9 +1,12 @@
 # Build
 build/
 dist/
+.cache/
+compile_commands.json
 
 # Envs
 .env
 
 # Resources
 res/
+
