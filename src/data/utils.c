@@ -73,7 +73,7 @@ void load_idx_tensor(const char *filename, Tensor *tensor) {
 
   tensor->stride = malloc(dim_num * sizeof(size_t));
   tensor->stride[dim_num - 1] = 1;
-  for (int8_t i = dim_num - 2; i >= 0; i--) {
+  for (int32_t i = dim_num - 2; i >= 0; i--) {
     tensor->stride[i] = tensor->shape[i + 1] * tensor->stride[i + 1];
   }
 

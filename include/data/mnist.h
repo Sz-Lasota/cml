@@ -8,6 +8,6 @@
 void load_mnist(const char *image_filename, const char *label_filename,
                 Dataset *ds);
 
-void print_digit(const Tensor *image, size_t index);
+void print_digit(const Tensor *image);
 
 #endif // DATA_MNIST_H

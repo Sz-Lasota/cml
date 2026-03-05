@@ -1,28 +1,119 @@
 #include "math/tensor.h"
 #include <math.h>
 #include <stdarg.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-void *tensor_get(const Tensor *tensor, uint32_t argc, ...) {
-  if (argc != tensor->dims) {
-    printf("error: invalid dimensions\n");
-    exit(EXIT_FAILURE);
+#define _TPRINT_INDENT 2
+
+uint32_t dtype_size(DType type) {
+  switch (type) {
+  case DTYPE_UINT8:
+    return 1;
+  case DTYPE_FLOAT32:
+    return 4;
+  case DTYPE_UINT32:
+    return 4;
+  case DTYPE_INT32:
+    return 4;
+  }
+  return 0;
+}
+
+static void t_calc_stride(Tensor *t) {
+  t->stride = malloc(t->dims * sizeof(size_t));
+  t->stride[t->dims - 1] = 1;
+  for (int32_t i = t->dims - 2; i >= 0; i--) {
+    t->stride[i] = t->shape[i + 1] * t->stride[i + 1];
+  }
+}
+
+static size_t t_data_size(const Tensor *t) {
+  size_t mem_size = dtype_size(t->dtype);
+  for (size_t i = 0; i < t->dims; i++) {
+    mem_size *= t->shape[i];
+  }
+  return mem_size;
+}
+
+Tensor *t_new(DType type, size_t dims, size_t *shape) {
+  Tensor *t = malloc(sizeof(Tensor));
+  t->dtype = type;
+  t->dims = dims;
+
+  t->shape = malloc(dims * sizeof(size_t));
+  for (size_t i = 0; i < dims; i++) {
+    t->shape[i] = shape[i];
   }
 
-  va_list args;
-  va_start(args, argc);
+  size_t mem_size = t_data_size(t);
+  t->data = malloc(mem_size);
+  t_calc_stride(t);
+  return t;
+}
 
+Tensor *t_arange(size_t range, DType type) {
+  Tensor *t = malloc(sizeof(Tensor));
+  t->dims = 1;
+  t->dtype = type;
+  t->shape = malloc(sizeof(size_t));
+  t->shape[0] = range;
+
+  t_calc_stride(t);
+
+  size_t mem_size = t_data_size(t);
+  t->data = malloc(mem_size);
+
+  switch (t->dtype) {
+  case DTYPE_UINT8: {
+    uint8_t *data = (uint8_t *)t->data;
+    for (size_t i = 0; i < range; i++) {
+      *data = i;
+      data++;
+    }
+    break;
+  }
+  case DTYPE_UINT32: {
+    uint32_t *data = (uint32_t *)t->data;
+    for (size_t i = 0; i < range; i++) {
+      *data = i;
+      data++;
+    }
+    break;
+  }
+  case DTYPE_INT32: {
+    int32_t *data = (int32_t *)t->data;
+    for (size_t i = 0; i < range; i++) {
+      *data = i;
+      data++;
+    }
+    break;
+  }
+  case DTYPE_FLOAT32: {
+    float_t *data = (float_t *)t->data;
+    for (size_t i = 0; i < range; i++) {
+      *data = i;
+      data++;
+    }
+    break;
+  }
+  }
+  return t;
+}
+
+void *t_get_element(const Tensor *tensor, size_t *indices) {
   size_t idx = 0;
-  for (uint32_t i = 0; i < argc; i++) {
-    size_t traverse = va_arg(args, size_t);
+  for (uint32_t i = 0; i < tensor->dims; i++) {
+    size_t traverse = indices[i];
     if (traverse >= tensor->shape[i]) {
       printf("error: index out of bounds for tensor\n");
       exit(EXIT_FAILURE);
     }
     idx += traverse * tensor->stride[i];
   }
-  va_end(args);
 
   switch (tensor->dtype) {
   case DTYPE_UINT8: {
@@ -33,7 +124,218 @@ void *tensor_get(const Tensor *tensor, uint32_t argc, ...) {
     float_t *data = (float_t *)tensor->data;
     return &data[idx];
   }
-  default:
-    return NULL;
+  case DTYPE_UINT32: {
+    uint32_t *data = (uint32_t *)tensor->data;
+    return &data[idx];
   }
+  case DTYPE_INT32: {
+    int32_t *data = (int32_t *)tensor->data;
+    return &data[idx];
+  }
+  }
+  return NULL;
+}
+
+void t_get_tensor(const Tensor *tensor_in, Tensor *tensor_out,
+                  size_t indices_len, size_t *indices) {
+  if (indices_len > tensor_in->dims) {
+    printf("error: invalid dimensions\n");
+    exit(EXIT_FAILURE);
+  }
+
+  size_t offset = 0;
+  for (size_t i = 0; i < indices_len; i++) {
+    size_t traverse = indices[i];
+    if (traverse >= tensor_in->shape[i]) {
+      printf("error: index out of bounds for tensor\n");
+      exit(EXIT_FAILURE);
+    }
+    offset += traverse * tensor_in->stride[i];
+  }
+
+  tensor_out->dtype = tensor_in->dtype;
+  tensor_out->dims =
+      tensor_in->dims == indices_len ? 1 : tensor_in->dims - indices_len;
+  tensor_out->shape = malloc(tensor_out->dims * sizeof(size_t));
+  for (size_t i = 0; i < tensor_out->dims; i++) {
+    // Only when argc == tensor_in->dims
+    if (i + indices_len == tensor_in->dims) {
+      tensor_out->shape[i] = 1;
+      break;
+    }
+    tensor_out->shape[i] = tensor_in->shape[i + indices_len];
+  }
+
+  t_calc_stride(tensor_out);
+
+  size_t mem_size = t_data_size(tensor_out);
+
+  tensor_out->data = malloc(mem_size);
+  memcpy(tensor_out->data,
+         tensor_in->data + dtype_size(tensor_out->dtype) * offset, mem_size);
+}
+
+void t_set_element(Tensor *tensor, void *element, size_t *indices) {
+  size_t idx = 0;
+  for (uint32_t i = 0; i < tensor->dims; i++) {
+    size_t traverse = indices[i];
+    if (traverse >= tensor->shape[i]) {
+      printf("error: index out of bounds for tensor\n");
+      exit(EXIT_FAILURE);
+    }
+    idx += traverse * tensor->stride[i];
+  }
+
+  switch (tensor->dtype) {
+  case DTYPE_UINT8: {
+    uint8_t *data = (uint8_t *)tensor->data;
+    data[idx] = *(uint8_t *)element;
+    break;
+  }
+  case DTYPE_FLOAT32: {
+    float_t *data = (float_t *)tensor->data;
+    data[idx] = *(float_t *)element;
+    break;
+  }
+  case DTYPE_UINT32: {
+    uint32_t *data = (uint32_t *)tensor->data;
+    data[idx] = *(uint32_t *)element;
+    break;
+  }
+
+  case DTYPE_INT32: {
+    int32_t *data = (int32_t *)tensor->data;
+    data[idx] = *(int32_t *)element;
+    break;
+  }
+  }
+}
+
+void t_reshape(Tensor *tensor, size_t new_shape_len, int32_t *shape) {
+  size_t *new_shape = malloc(new_shape_len * sizeof(size_t));
+  int64_t wildcard_idx = -1;
+  size_t new_capacity = 1;
+  size_t old_capacity = t_data_size(tensor) / dtype_size(tensor->dtype);
+
+  for (size_t i = 0; i < new_shape_len; i++) {
+    int32_t shp = shape[i];
+    new_shape[i] = shp;
+    if (shp < 0 && wildcard_idx >= 0) {
+      printf("error: only one -1 is allowed when reshaping\n");
+      exit(EXIT_FAILURE);
+    }
+    if (shp < 0) {
+      wildcard_idx = i;
+      continue;
+    }
+    new_capacity *= shp;
+  }
+
+  if (wildcard_idx >= 0) {
+    if (old_capacity % new_capacity != 0) {
+      printf("error: could not determine wildcard value!\n");
+      exit(EXIT_FAILURE);
+    }
+    new_shape[wildcard_idx] = old_capacity / new_capacity;
+    new_capacity *= new_shape[wildcard_idx];
+  }
+
+  if (new_capacity != old_capacity) {
+    printf("error: cannot reshape tensor! new cap: %ld, old cap: %ld\n",
+           new_capacity, old_capacity);
+    exit(EXIT_FAILURE);
+  }
+
+  tensor->dims = new_shape_len;
+
+  free(tensor->shape);
+  tensor->shape = new_shape;
+
+  free(tensor->stride);
+  t_calc_stride(tensor);
+}
+
+void t_flatten(Tensor *tensor) {
+  int32_t shape[] = {-1};
+  t_reshape(tensor, 1, shape);
+}
+
+void t_free(Tensor *tensor) {
+  free(tensor->shape);
+  free(tensor->stride);
+  free(tensor->data);
+  free(tensor);
+}
+
+static void t_print_row(const Tensor *tensor, uint32_t indent) {
+  if (tensor->dims != 1) {
+    printf("error: print row prints only vectors!");
+    exit(EXIT_FAILURE);
+  }
+  if (indent > 0) {
+    printf("%*s[", indent, " ");
+  } else {
+
+    printf("[");
+  }
+  for (size_t i = 0; i < tensor->shape[0]; i++) {
+    size_t indices[] = {i};
+    switch (tensor->dtype) {
+    case DTYPE_UINT8:
+      printf("%3d", *(uint8_t *)t_get_element(tensor, indices));
+      break;
+    case DTYPE_FLOAT32:
+      printf("%3.6f", *(float_t *)t_get_element(tensor, indices));
+      break;
+    case DTYPE_UINT32:
+      printf("%3d", *(uint32_t *)t_get_element(tensor, indices));
+      break;
+    case DTYPE_INT32:
+      printf("%3d", *(int32_t *)t_get_element(tensor, indices));
+      break;
+    }
+  }
+  printf("]");
+}
+
+static void t_print_indent(const Tensor *tensor, uint32_t indent) {
+  if (tensor->dims == 1) {
+    t_print_row(tensor, indent + _TPRINT_INDENT);
+    printf("\n");
+    return;
+  }
+
+  printf("%*s[\n", indent, " ");
+  for (size_t i = 0; i < tensor->shape[0]; i++) {
+    Tensor child;
+    size_t indices[] = {i};
+
+    t_get_tensor(tensor, &child, 1, indices);
+    t_print_indent(&child, indent + _TPRINT_INDENT);
+  }
+  printf("%*s]", indent, " ");
+  printf("\n");
+}
+
+void t_print(const Tensor *tensor) {
+  if (tensor->dims == 1) {
+    t_print_row(tensor, 0);
+    printf("\n");
+    return;
+  }
+
+  printf("[\n");
+  for (size_t i = 0; i < tensor->shape[0]; i++) {
+    Tensor child;
+    size_t indices[] = {i};
+
+    t_get_tensor(tensor, &child, 1, indices);
+    t_print_indent(&child, _TPRINT_INDENT);
+  }
+  printf("]");
+  printf("\n");
+}
+
+size_t t_len(const Tensor *tensor) {
+    return t_data_size(tensor) / dtype_size(tensor->dtype);
 }
