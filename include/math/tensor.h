@@ -19,6 +19,12 @@ typedef struct {
   DType dtype;
 } Tensor;
 
+// TODO:
+//  - [ ] min, max, avg, std
+//  - [ ] ones, zeros, ones_like, zeros_like
+//  - [ ] get axis
+
+
 uint32_t dtype_size(DType type);
 
 Tensor *t_new(DType type, size_t dims, size_t *shape);
@@ -35,5 +41,4 @@ void t_flatten(Tensor *tensor);
 
 void t_print(const Tensor *tensor);
 size_t t_len(const Tensor *tensor);
-
 #endif // MATH_TENSOR_H

@@ -282,16 +282,16 @@ static void t_print_row(const Tensor *tensor, uint32_t indent) {
     size_t indices[] = {i};
     switch (tensor->dtype) {
     case DTYPE_UINT8:
-      printf("%3d", *(uint8_t *)t_get_element(tensor, indices));
+      printf(" %3d", *(uint8_t *)t_get_element(tensor, indices));
       break;
     case DTYPE_FLOAT32:
-      printf("%3.6f", *(float_t *)t_get_element(tensor, indices));
+      printf(" %3.6f", *(float_t *)t_get_element(tensor, indices));
       break;
     case DTYPE_UINT32:
-      printf("%3d", *(uint32_t *)t_get_element(tensor, indices));
+      printf(" %3d", *(uint32_t *)t_get_element(tensor, indices));
       break;
     case DTYPE_INT32:
-      printf("%3d", *(int32_t *)t_get_element(tensor, indices));
+      printf(" %3d", *(int32_t *)t_get_element(tensor, indices));
       break;
     }
   }
