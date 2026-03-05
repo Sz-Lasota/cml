@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 typedef enum {
-  DTYPE_UINT8,
+  DTYPE_UINT8 = 0,
   DTYPE_UINT32,
   DTYPE_INT32,
   DTYPE_FLOAT32,
@@ -19,11 +19,14 @@ typedef struct {
   DType dtype;
 } Tensor;
 
+typedef void (*arange_fill_fn)(void *, size_t);
+typedef void *(*get_element_fn)(void *, size_t);
+typedef void (*set_element_fn)(void *, size_t, void *);
+typedef void (*print_element_fn)(const Tensor *, size_t *);
 // TODO:
 //  - [ ] min, max, avg, std
 //  - [ ] ones, zeros, ones_like, zeros_like
 //  - [ ] get axis
-
 
 uint32_t dtype_size(DType type);
 

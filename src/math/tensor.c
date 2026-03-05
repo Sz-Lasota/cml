@@ -55,6 +55,37 @@ Tensor *t_new(DType type, size_t dims, size_t *shape) {
   return t;
 }
 
+static void arange_fill_u8(void *tdata, size_t range) {
+  uint8_t *data = (uint8_t *)tdata;
+  for (size_t i = 0; i < range; i++) {
+    *data = i;
+    data++;
+  }
+}
+static void arange_fill_u32(void *tdata, size_t range) {
+  uint32_t *data = (uint32_t *)tdata;
+  for (size_t i = 0; i < range; i++) {
+    *data = i;
+    data++;
+  }
+}
+
+static void arange_fill_i32(void *tdata, size_t range) {
+  int32_t *data = (int32_t *)tdata;
+  for (size_t i = 0; i < range; i++) {
+    *data = i;
+    data++;
+  }
+}
+
+static void arange_fill_f32(void *tdata, size_t range) {
+  float_t *data = (float_t *)tdata;
+  for (size_t i = 0; i < range; i++) {
+    *data = i;
+    data++;
+  }
+}
+
 Tensor *t_arange(size_t range, DType type) {
   Tensor *t = malloc(sizeof(Tensor));
   t->dims = 1;
@@ -67,41 +98,34 @@ Tensor *t_arange(size_t range, DType type) {
   size_t mem_size = t_data_size(t);
   t->data = malloc(mem_size);
 
-  switch (t->dtype) {
-  case DTYPE_UINT8: {
-    uint8_t *data = (uint8_t *)t->data;
-    for (size_t i = 0; i < range; i++) {
-      *data = i;
-      data++;
-    }
-    break;
-  }
-  case DTYPE_UINT32: {
-    uint32_t *data = (uint32_t *)t->data;
-    for (size_t i = 0; i < range; i++) {
-      *data = i;
-      data++;
-    }
-    break;
-  }
-  case DTYPE_INT32: {
-    int32_t *data = (int32_t *)t->data;
-    for (size_t i = 0; i < range; i++) {
-      *data = i;
-      data++;
-    }
-    break;
-  }
-  case DTYPE_FLOAT32: {
-    float_t *data = (float_t *)t->data;
-    for (size_t i = 0; i < range; i++) {
-      *data = i;
-      data++;
-    }
-    break;
-  }
-  }
+  arange_fill_fn dtable[] = {
+      arange_fill_u8,
+      arange_fill_u32,
+      arange_fill_i32,
+      arange_fill_f32,
+  };
+  dtable[t->dtype](t->data, range);
   return t;
+}
+
+static void *get_element_u8(void *tdata, size_t idx) {
+  uint8_t *data = (uint8_t *)tdata;
+  return &data[idx];
+}
+
+static void *get_element_f32(void *tdata, size_t idx) {
+  float_t *data = (float_t *)tdata;
+  return &data[idx];
+}
+
+static void *get_element_u32(void *tdata, size_t idx) {
+  uint32_t *data = (uint32_t *)tdata;
+  return &data[idx];
+}
+
+static void *get_element_i32(void *tdata, size_t idx) {
+  int32_t *data = (int32_t *)tdata;
+  return &data[idx];
 }
 
 void *t_get_element(const Tensor *tensor, size_t *indices) {
@@ -115,25 +139,13 @@ void *t_get_element(const Tensor *tensor, size_t *indices) {
     idx += traverse * tensor->stride[i];
   }
 
-  switch (tensor->dtype) {
-  case DTYPE_UINT8: {
-    uint8_t *data = (uint8_t *)tensor->data;
-    return &data[idx];
-  }
-  case DTYPE_FLOAT32: {
-    float_t *data = (float_t *)tensor->data;
-    return &data[idx];
-  }
-  case DTYPE_UINT32: {
-    uint32_t *data = (uint32_t *)tensor->data;
-    return &data[idx];
-  }
-  case DTYPE_INT32: {
-    int32_t *data = (int32_t *)tensor->data;
-    return &data[idx];
-  }
-  }
-  return NULL;
+  get_element_fn dtable[] = {
+      get_element_u8,
+      get_element_u32,
+      get_element_i32,
+      get_element_f32,
+  };
+  return dtable[tensor->dtype](tensor->data, idx);
 }
 
 void t_get_tensor(const Tensor *tensor_in, Tensor *tensor_out,
@@ -175,6 +187,26 @@ void t_get_tensor(const Tensor *tensor_in, Tensor *tensor_out,
          tensor_in->data + dtype_size(tensor_out->dtype) * offset, mem_size);
 }
 
+void set_element_u8(void *tdata, size_t idx, void *element) {
+  uint8_t *data = (uint8_t *)tdata;
+  data[idx] = *(uint8_t *)element;
+}
+
+void set_element_f32(void *tdata, size_t idx, void *element) {
+  float_t *data = (float_t *)tdata;
+  data[idx] = *(float_t *)element;
+}
+
+void set_element_u32(void *tdata, size_t idx, void *element) {
+  uint32_t *data = (uint32_t *)tdata;
+  data[idx] = *(uint32_t *)element;
+}
+
+void set_element_i32(void *tdata, size_t idx, void *element) {
+  int32_t *data = (int32_t *)tdata;
+  data[idx] = *(int32_t *)element;
+}
+
 void t_set_element(Tensor *tensor, void *element, size_t *indices) {
   size_t idx = 0;
   for (uint32_t i = 0; i < tensor->dims; i++) {
@@ -186,29 +218,13 @@ void t_set_element(Tensor *tensor, void *element, size_t *indices) {
     idx += traverse * tensor->stride[i];
   }
 
-  switch (tensor->dtype) {
-  case DTYPE_UINT8: {
-    uint8_t *data = (uint8_t *)tensor->data;
-    data[idx] = *(uint8_t *)element;
-    break;
-  }
-  case DTYPE_FLOAT32: {
-    float_t *data = (float_t *)tensor->data;
-    data[idx] = *(float_t *)element;
-    break;
-  }
-  case DTYPE_UINT32: {
-    uint32_t *data = (uint32_t *)tensor->data;
-    data[idx] = *(uint32_t *)element;
-    break;
-  }
-
-  case DTYPE_INT32: {
-    int32_t *data = (int32_t *)tensor->data;
-    data[idx] = *(int32_t *)element;
-    break;
-  }
-  }
+  set_element_fn dtable[] = {
+      set_element_u8,
+      set_element_u32,
+      set_element_i32,
+      set_element_f32,
+  };
+  dtable[tensor->dtype](tensor->data, idx, element);
 }
 
 void t_reshape(Tensor *tensor, size_t new_shape_len, int32_t *shape) {
@@ -267,6 +283,22 @@ void t_free(Tensor *tensor) {
   free(tensor);
 }
 
+static void print_element_u8(const Tensor *tensor, size_t *indices) {
+  printf(" %3d", *(uint8_t *)t_get_element(tensor, indices));
+}
+
+static void print_element_u32(const Tensor *tensor, size_t *indices) {
+  printf(" %3d", *(uint32_t *)t_get_element(tensor, indices));
+}
+
+static void print_element_i32(const Tensor *tensor, size_t *indices) {
+  printf(" %3d", *(int32_t *)t_get_element(tensor, indices));
+}
+
+static void print_element_f32(const Tensor *tensor, size_t *indices) {
+  printf(" %3.6f", *(float_t *)t_get_element(tensor, indices));
+}
+
 static void t_print_row(const Tensor *tensor, uint32_t indent) {
   if (tensor->dims != 1) {
     printf("error: print row prints only vectors!");
@@ -280,20 +312,14 @@ static void t_print_row(const Tensor *tensor, uint32_t indent) {
   }
   for (size_t i = 0; i < tensor->shape[0]; i++) {
     size_t indices[] = {i};
-    switch (tensor->dtype) {
-    case DTYPE_UINT8:
-      printf(" %3d", *(uint8_t *)t_get_element(tensor, indices));
-      break;
-    case DTYPE_FLOAT32:
-      printf(" %3.6f", *(float_t *)t_get_element(tensor, indices));
-      break;
-    case DTYPE_UINT32:
-      printf(" %3d", *(uint32_t *)t_get_element(tensor, indices));
-      break;
-    case DTYPE_INT32:
-      printf(" %3d", *(int32_t *)t_get_element(tensor, indices));
-      break;
-    }
+    print_element_fn dtable[] = {
+        print_element_u8,
+        print_element_u32,
+        print_element_i32,
+        print_element_f32,
+
+    };
+    dtable[tensor->dtype](tensor, indices);
   }
   printf("]");
 }
@@ -337,5 +363,5 @@ void t_print(const Tensor *tensor) {
 }
 
 size_t t_len(const Tensor *tensor) {
-    return t_data_size(tensor) / dtype_size(tensor->dtype);
+  return t_data_size(tensor) / dtype_size(tensor->dtype);
 }
