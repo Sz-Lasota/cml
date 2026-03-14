@@ -2,7 +2,7 @@
 #include "math/tensor.h"
 #include <math.h>
 
-void add_scalar_u8(Tensor *t, void *scalar, size_t n) {
+static void add_scalar_u8(Tensor *t, void *scalar, size_t n) {
   uint8_t sc = *(uint8_t *)scalar;
   uint8_t *data = (uint8_t *)t->data;
   for (size_t i = 0; i < n; i++) {
@@ -10,7 +10,7 @@ void add_scalar_u8(Tensor *t, void *scalar, size_t n) {
   }
 }
 
-void add_scalar_u32(Tensor *t, void *scalar, size_t n) {
+static void add_scalar_u32(Tensor *t, void *scalar, size_t n) {
   uint32_t sc = *(uint32_t *)scalar;
   uint32_t *data = (uint32_t *)t->data;
   for (size_t i = 0; i < n; i++) {
@@ -18,7 +18,7 @@ void add_scalar_u32(Tensor *t, void *scalar, size_t n) {
   }
 }
 
-void add_scalar_i32(Tensor *t, void *scalar, size_t n) {
+static void add_scalar_i32(Tensor *t, void *scalar, size_t n) {
   int32_t sc = *(int32_t *)scalar;
   int32_t *data = (int32_t *)t->data;
   for (size_t i = 0; i < n; i++) {
@@ -26,7 +26,7 @@ void add_scalar_i32(Tensor *t, void *scalar, size_t n) {
   }
 }
 
-void add_scalar_f32(Tensor *t, void *scalar, size_t n) {
+static void add_scalar_f32(Tensor *t, void *scalar, size_t n) {
   float_t sc = *(float_t *)scalar;
   float_t *data = (float_t *)t->data;
   for (size_t i = 0; i < n; i++) {
@@ -46,7 +46,7 @@ void t_add_scalar(Tensor *t, void *scalar) {
   dtable[t->dtype](t, scalar, n);
 }
 
-void mul_scalar_u8(Tensor *t, void *scalar, size_t n) {
+static void mul_scalar_u8(Tensor *t, void *scalar, size_t n) {
   uint8_t sc = *(uint8_t *)scalar;
   uint8_t *data = (uint8_t *)t->data;
   for (size_t i = 0; i < n; i++) {
@@ -54,7 +54,7 @@ void mul_scalar_u8(Tensor *t, void *scalar, size_t n) {
   }
 }
 
-void mul_scalar_u32(Tensor *t, void *scalar, size_t n) {
+static void mul_scalar_u32(Tensor *t, void *scalar, size_t n) {
   uint32_t sc = *(uint32_t *)scalar;
   uint32_t *data = (uint32_t *)t->data;
   for (size_t i = 0; i < n; i++) {
@@ -62,7 +62,7 @@ void mul_scalar_u32(Tensor *t, void *scalar, size_t n) {
   }
 }
 
-void mul_scalar_i32(Tensor *t, void *scalar, size_t n) {
+static void mul_scalar_i32(Tensor *t, void *scalar, size_t n) {
   int32_t sc = *(int32_t *)scalar;
   int32_t *data = (int32_t *)t->data;
   for (size_t i = 0; i < n; i++) {
@@ -70,7 +70,7 @@ void mul_scalar_i32(Tensor *t, void *scalar, size_t n) {
   }
 }
 
-void mul_scalar_f32(Tensor *t, void *scalar, size_t n) {
+static void mul_scalar_f32(Tensor *t, void *scalar, size_t n) {
   float_t sc = *(float_t *)scalar;
   float_t *data = (float_t *)t->data;
   for (size_t i = 0; i < n; i++) {
@@ -90,3 +90,4 @@ void t_multiply(Tensor *t, void *scalar) {
   };
   dtable[t->dtype](t, scalar, n);
 }
+

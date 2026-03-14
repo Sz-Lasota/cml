@@ -187,22 +187,22 @@ void t_get_tensor(const Tensor *tensor_in, Tensor *tensor_out,
          tensor_in->data + dtype_size(tensor_out->dtype) * offset, mem_size);
 }
 
-void set_element_u8(void *tdata, size_t idx, void *element) {
+static void set_element_u8(void *tdata, size_t idx, void *element) {
   uint8_t *data = (uint8_t *)tdata;
   data[idx] = *(uint8_t *)element;
 }
 
-void set_element_f32(void *tdata, size_t idx, void *element) {
+static void set_element_f32(void *tdata, size_t idx, void *element) {
   float_t *data = (float_t *)tdata;
   data[idx] = *(float_t *)element;
 }
 
-void set_element_u32(void *tdata, size_t idx, void *element) {
+static void set_element_u32(void *tdata, size_t idx, void *element) {
   uint32_t *data = (uint32_t *)tdata;
   data[idx] = *(uint32_t *)element;
 }
 
-void set_element_i32(void *tdata, size_t idx, void *element) {
+static void set_element_i32(void *tdata, size_t idx, void *element) {
   int32_t *data = (int32_t *)tdata;
   data[idx] = *(int32_t *)element;
 }
