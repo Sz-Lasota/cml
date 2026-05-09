@@ -1,7 +1,5 @@
 #include "math/tensor_ops.h"
 #include "math/tensor.h"
-#include <cstdio>
-#include <cstdlib>
 #include <math.h>
 #include <stdio.h>
 
