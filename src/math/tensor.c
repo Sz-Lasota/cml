@@ -108,6 +108,23 @@ Tensor *t_arange(size_t range, DType type) {
   return t;
 }
 
+Tensor *t_zeros_like(const Tensor *tensor) {
+  Tensor *t = malloc(sizeof(Tensor));
+  t->dtype = tensor->dtype;
+  t->dims = tensor->dims;
+  t->shape = malloc(t->dims * sizeof(size_t));
+  t->stride = malloc(t->dims * sizeof(size_t));
+
+  memcpy(t->stride, tensor->stride, t->dims * sizeof(size_t));
+  memcpy(t->shape, tensor->shape, t->dims * sizeof(size_t));
+
+  size_t mem_size = t_data_size(t);
+  t->data = malloc(mem_size);
+  memset(t->data, 0, mem_size);
+
+  return t;
+}
+
 static void *get_element_u8(void *tdata, size_t idx) {
   uint8_t *data = (uint8_t *)tdata;
   return &data[idx];

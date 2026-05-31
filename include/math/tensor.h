@@ -32,6 +32,7 @@ uint32_t dtype_size(DType type);
 
 Tensor *t_new(DType type, size_t dims, size_t *shape);
 Tensor *t_arange(size_t range, DType type);
+Tensor *t_zeros_like(const Tensor *tensor);
 void t_free(Tensor *tensor);
 
 void *t_get_element(const Tensor *tensor, size_t *indices);
