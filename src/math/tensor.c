@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/random.h>
 
 #define _TPRINT_INDENT 2
 
@@ -21,6 +22,16 @@ uint32_t dtype_size(DType type) {
     return 4;
   }
   return 0;
+}
+
+static inline void random_bytes(void *buf, size_t len) {
+  getrandom(buf, len, 0);
+}
+
+static inline float_t random_float() {
+  int32_t rand_int;
+  random_bytes(&rand_int, sizeof(rand_int));
+  return (float_t)rand_int / (float_t)UINT32_MAX;
 }
 
 static void t_calc_stride(Tensor *t) {
@@ -90,7 +101,9 @@ static void fill_random_u8(Tensor *tensor) {
   uint8_t *data = (uint8_t *)tensor->data;
   size_t len = t_len(tensor);
   for (size_t i = 0; i < len; i++) {
-    data[i] = rand() % 256;
+    uint8_t random_value;
+    random_bytes(&random_value, sizeof(random_value));
+    data[i] = random_value;
   }
 }
 
@@ -98,7 +111,9 @@ static void fill_random_u32(Tensor *tensor) {
   uint32_t *data = (uint32_t *)tensor->data;
   size_t len = t_len(tensor);
   for (size_t i = 0; i < len; i++) {
-    data[i] = ((uint32_t)rand() << 16) | (uint32_t)rand();
+    uint32_t random_value;
+    random_bytes(&random_value, sizeof(random_value));
+    data[i] = random_value;
   }
 }
 
@@ -106,7 +121,9 @@ static void fill_random_i32(Tensor *tensor) {
   int32_t *data = (int32_t *)tensor->data;
   size_t len = t_len(tensor);
   for (size_t i = 0; i < len; i++) {
-    data[i] = ((int32_t)rand() << 16) | (int32_t)rand();
+    int32_t random_value;
+    random_bytes(&random_value, sizeof(random_value));
+    data[i] = random_value;
   }
 }
 
@@ -114,7 +131,7 @@ static void fill_random_f32(Tensor *tensor) {
   float_t *data = (float_t *)tensor->data;
   size_t len = t_len(tensor);
   for (size_t i = 0; i < len; i++) {
-    data[i] = (float_t)rand() / (float_t)RAND_MAX;
+    data[i] = random_float();
   }
 }
 Tensor *t_arange(size_t range, DType type) {
