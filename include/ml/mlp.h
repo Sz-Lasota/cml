@@ -1,0 +1,33 @@
+#ifndef ML_MLP_H
+#define ML_MLP_H
+
+#include "math/tensor.h"
+#include <stdint.h>
+
+typedef struct {
+  uint32_t input_size;
+  uint32_t output_size;
+  Tensor *weights;
+  Tensor *biases;
+} Layer;
+
+typedef struct {
+  uint32_t layers_count;
+  Layer **layers;
+  uint32_t input_size;
+} MLP;
+
+Layer *layer_new(uint32_t input_size, uint32_t output_size);
+void layer_free(Layer *layer);
+Tensor *layer_forward(Layer *layer, Tensor *input);
+
+MLP *mlp_new(uint32_t input_size);
+void mlp_free(MLP *mlp);
+
+void mlp_append_layer(MLP *mlp, uint32_t neurons_count);
+void mlp_insert_layer(MLP *mlp, uint32_t index, uint32_t neurons_count);
+void mlp_remove_layer(MLP *mlp, uint32_t index);
+void mlp_pop_layer(MLP *mlp);
+
+Tensor *mlp_forward(MLP *mlp, Tensor *input);
+#endif // ML_MLP_H

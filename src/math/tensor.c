@@ -86,6 +86,37 @@ static void arange_fill_f32(void *tdata, size_t range) {
   }
 }
 
+static void fill_random_u8(Tensor *tensor) {
+  uint8_t *data = (uint8_t *)tensor->data;
+  size_t len = t_len(tensor);
+  for (size_t i = 0; i < len; i++) {
+    data[i] = rand() % 256;
+  }
+}
+
+static void fill_random_u32(Tensor *tensor) {
+  uint32_t *data = (uint32_t *)tensor->data;
+  size_t len = t_len(tensor);
+  for (size_t i = 0; i < len; i++) {
+    data[i] = ((uint32_t)rand() << 16) | (uint32_t)rand();
+  }
+}
+
+static void fill_random_i32(Tensor *tensor) {
+  int32_t *data = (int32_t *)tensor->data;
+  size_t len = t_len(tensor);
+  for (size_t i = 0; i < len; i++) {
+    data[i] = ((int32_t)rand() << 16) | (int32_t)rand();
+  }
+}
+
+static void fill_random_f32(Tensor *tensor) {
+  float_t *data = (float_t *)tensor->data;
+  size_t len = t_len(tensor);
+  for (size_t i = 0; i < len; i++) {
+    data[i] = (float_t)rand() / (float_t)RAND_MAX;
+  }
+}
 Tensor *t_arange(size_t range, DType type) {
   Tensor *t = malloc(sizeof(Tensor));
   t->dims = 1;
@@ -108,6 +139,87 @@ Tensor *t_arange(size_t range, DType type) {
   return t;
 }
 
+Tensor *t_random(DType type, size_t dims, size_t *shape) {
+  Tensor *t = malloc(sizeof(Tensor));
+  t->dtype = type;
+  t->dims = dims;
+  t->shape = malloc(t->dims * sizeof(size_t));
+  t->stride = malloc(t->dims * sizeof(size_t));
+
+  memcpy(t->shape, shape, t->dims * sizeof(size_t));
+  t_calc_stride(t);
+  size_t mem_size = t_data_size(t);
+  t->data = malloc(mem_size);
+
+  fill_tensor_with_random_data dtable[] = {
+      fill_random_u8,
+      fill_random_u32,
+      fill_random_i32,
+      fill_random_f32,
+  };
+  dtable[t->dtype](t);
+
+  return t;
+}
+
+Tensor *t_zeros(DType type, size_t dims, size_t *shape) {
+  Tensor *t = malloc(sizeof(Tensor));
+  t->dtype = type;
+  t->dims = dims;
+  t->shape = malloc(t->dims * sizeof(size_t));
+  t->stride = malloc(t->dims * sizeof(size_t));
+
+  memcpy(t->shape, shape, t->dims * sizeof(size_t));
+  t_calc_stride(t);
+
+  size_t mem_size = t_data_size(t);
+  t->data = malloc(mem_size);
+  memset(t->data, 0, mem_size);
+
+  return t;
+}
+
+Tensor *t_ones(DType type, size_t dims, size_t *shape) {
+  Tensor *t = malloc(sizeof(Tensor));
+  t->dtype = type;
+  t->dims = dims;
+  t->shape = malloc(t->dims * sizeof(size_t));
+  t->stride = malloc(t->dims * sizeof(size_t));
+
+  memcpy(t->shape, shape, t->dims * sizeof(size_t));
+  t_calc_stride(t);
+
+  size_t mem_size = t_data_size(t);
+  t->data = malloc(mem_size);
+  memset(t->data, 1, mem_size);
+
+  return t;
+}
+
+Tensor *t_random_like(const Tensor *tensor) {
+  Tensor *t = malloc(sizeof(Tensor));
+  t->dtype = tensor->dtype;
+  t->dims = tensor->dims;
+  t->shape = malloc(t->dims * sizeof(size_t));
+  t->stride = malloc(t->dims * sizeof(size_t));
+
+  memcpy(t->stride, tensor->stride, t->dims * sizeof(size_t));
+  memcpy(t->shape, tensor->shape, t->dims * sizeof(size_t));
+
+  size_t mem_size = t_data_size(t);
+  t->data = malloc(mem_size);
+
+  fill_tensor_with_random_data dtable[] = {
+      fill_random_u8,
+      fill_random_u32,
+      fill_random_i32,
+      fill_random_f32,
+  };
+  dtable[t->dtype](t);
+
+  return t;
+}
+
 Tensor *t_zeros_like(const Tensor *tensor) {
   Tensor *t = malloc(sizeof(Tensor));
   t->dtype = tensor->dtype;
@@ -125,6 +237,22 @@ Tensor *t_zeros_like(const Tensor *tensor) {
   return t;
 }
 
+Tensor *t_ones_like(const Tensor *tensor) {
+  Tensor *t = malloc(sizeof(Tensor));
+  t->dtype = tensor->dtype;
+  t->dims = tensor->dims;
+  t->shape = malloc(t->dims * sizeof(size_t));
+  t->stride = malloc(t->dims * sizeof(size_t));
+
+  memcpy(t->stride, tensor->stride, t->dims * sizeof(size_t));
+  memcpy(t->shape, tensor->shape, t->dims * sizeof(size_t));
+
+  size_t mem_size = t_data_size(t);
+  t->data = malloc(mem_size);
+  memset(t->data, 1, mem_size);
+
+  return t;
+}
 static void *get_element_u8(void *tdata, size_t idx) {
   uint8_t *data = (uint8_t *)tdata;
   return &data[idx];

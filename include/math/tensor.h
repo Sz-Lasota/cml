@@ -23,16 +23,25 @@ typedef void (*arange_fill_fn)(void *, size_t);
 typedef void *(*get_element_fn)(void *, size_t);
 typedef void (*set_element_fn)(void *, size_t, void *);
 typedef void (*print_element_fn)(const Tensor *, size_t *);
+typedef void (*fill_tensor_with_random_data)(Tensor *);
+
 // TODO:
 //  - [ ] min, max, avg, std
-//  - [ ] ones, zeros, ones_like, zeros_like
 //  - [ ] get axis
 
 uint32_t dtype_size(DType type);
 
 Tensor *t_new(DType type, size_t dims, size_t *shape);
+
+Tensor *t_random(DType type, size_t dims, size_t *shape);
+Tensor *t_zeros(DType type, size_t dims, size_t *shape);
+Tensor *t_ones(DType type, size_t dims, size_t *shape);
+
 Tensor *t_arange(size_t range, DType type);
+
+Tensor *t_random_like(const Tensor *tensor);
 Tensor *t_zeros_like(const Tensor *tensor);
+Tensor *t_ones_like(const Tensor *tensor);
 void t_free(Tensor *tensor);
 
 void *t_get_element(const Tensor *tensor, size_t *indices);
