@@ -174,6 +174,67 @@ Tensor *t_add_tensor(const Tensor *t1, const Tensor *t2) {
   return result;
 }
 
+static void sub_tensor_u8(const Tensor *t1, const Tensor *t2, Tensor *result) {
+  uint8_t *data1 = (uint8_t *)t1->data;
+  uint8_t *data2 = (uint8_t *)t2->data;
+  uint8_t *result_data = (uint8_t *)result->data;
+  size_t n = t_len(t1);
+  for (size_t i = 0; i < n; i++) {
+    result_data[i] = data1[i] - data2[i];
+  }
+}
+
+static void sub_tensor_u32(const Tensor *t1, const Tensor *t2, Tensor *result) {
+  uint32_t *data1 = (uint32_t *)t1->data;
+  uint32_t *data2 = (uint32_t *)t2->data;
+  uint32_t *result_data = (uint32_t *)result->data;
+  size_t n = t_len(t1);
+  for (size_t i = 0; i < n; i++) {
+    result_data[i] = data1[i] - data2[i];
+  }
+}
+
+static void sub_tensor_i32(const Tensor *t1, const Tensor *t2, Tensor *result) {
+  int32_t *data1 = (int32_t *)t1->data;
+  int32_t *data2 = (int32_t *)t2->data;
+  int32_t *result_data = (int32_t *)result->data;
+  size_t n = t_len(t1);
+  for (size_t i = 0; i < n; i++) {
+    result_data[i] = data1[i] - data2[i];
+  }
+}
+
+static void sub_tensor_f32(const Tensor *t1, const Tensor *t2, Tensor *result) {
+  float_t *data1 = (float_t *)t1->data;
+  float_t *data2 = (float_t *)t2->data;
+  float_t *result_data = (float_t *)result->data;
+  size_t n = t_len(t1);
+  for (size_t i = 0; i < n; i++) {
+    result_data[i] = data1[i] - data2[i];
+  }
+}
+
+
+Tensor *t_sub_tensor(const Tensor *t1, const Tensor *t2) {
+
+  if (!_t_is_same_shape(t1, t2)) {
+    fprintf(
+        stderr,
+        "error: Tensors must have the same shape and dtype for addition.\n");
+    return NULL;
+  }
+
+  Tensor *result = t_zeros_like(t1);
+
+  sub_tensor_fn dtable[] = {
+      sub_tensor_u8,
+      sub_tensor_u32,
+      sub_tensor_i32,
+      sub_tensor_f32,
+  };
+  dtable[t1->dtype](t1, t2, result);
+  return result;
+}
 static void mul_tensor_u8(const Tensor *t1, const Tensor *t2, Tensor *result) {
   uint8_t *data1 = (uint8_t *)t1->data;
   uint8_t *data2 = (uint8_t *)t2->data;

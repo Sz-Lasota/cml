@@ -134,6 +134,39 @@ static void fill_random_f32(Tensor *tensor) {
     data[i] = random_float();
   }
 }
+
+static void fill_ones_u8(Tensor *tensor) {
+  uint8_t *data = (uint8_t *)tensor->data;
+  size_t len = t_len(tensor);
+  for (size_t i = 0; i < len; i++) {
+    data[i] = 1;
+  }
+}
+
+static void fill_ones_u32(Tensor *tensor) {
+  uint32_t *data = (uint32_t *)tensor->data;
+  size_t len = t_len(tensor);
+  for (size_t i = 0; i < len; i++) {
+    data[i] = 1;
+  }
+}
+
+static void fill_ones_i32(Tensor *tensor) {
+  int32_t *data = (int32_t *)tensor->data;
+  size_t len = t_len(tensor);
+  for (size_t i = 0; i < len; i++) {
+    data[i] = 1;
+  }
+}
+
+static void fill_ones_f32(Tensor *tensor) {
+  float_t *data = (float_t *)tensor->data;
+  size_t len = t_len(tensor);
+  for (size_t i = 0; i < len; i++) {
+    data[i] = 1.0;
+  }
+}
+
 Tensor *t_arange(size_t range, DType type) {
   Tensor *t = malloc(sizeof(Tensor));
   t->dims = 1;
@@ -208,7 +241,14 @@ Tensor *t_ones(DType type, size_t dims, size_t *shape) {
 
   size_t mem_size = t_data_size(t);
   t->data = malloc(mem_size);
-  memset(t->data, 1, mem_size);
+  fill_tensor_with_ones dtable[] = {
+      fill_ones_u8,
+      fill_ones_u32,
+      fill_ones_i32,
+      fill_ones_f32,
+  };
+  dtable[t->dtype](t);
+
 
   return t;
 }
@@ -266,7 +306,13 @@ Tensor *t_ones_like(const Tensor *tensor) {
 
   size_t mem_size = t_data_size(t);
   t->data = malloc(mem_size);
-  memset(t->data, 1, mem_size);
+  fill_tensor_with_ones dtable[] = {
+      fill_ones_u8,
+      fill_ones_u32,
+      fill_ones_i32,
+      fill_ones_f32,
+  };
+  dtable[t->dtype](t);
 
   return t;
 }
@@ -526,4 +572,50 @@ void t_print(const Tensor *tensor) {
 
 size_t t_len(const Tensor *tensor) {
   return t_data_size(tensor) / dtype_size(tensor->dtype);
+}
+
+static void sum_tensor_u8(const Tensor *tensor, Tensor *result, size_t n) {
+  uint8_t *data = (uint8_t *)tensor->data;
+  uint8_t *acc = (uint8_t *)result->data;
+  for (size_t i = 0; i < n; i++) {
+    acc[0] += data[i];
+  }
+}
+
+static void sum_tensor_u32(const Tensor *tensor, Tensor *result, size_t n) {
+  uint32_t *data = (uint32_t *)tensor->data;
+  uint32_t *acc = (uint32_t *)result->data;
+  for (size_t i = 0; i < n; i++) {
+    acc[0] += data[i];
+  }
+}
+
+static void sum_tensor_i32(const Tensor *tensor, Tensor *result, size_t n) {
+  int32_t *data = (int32_t *)tensor->data;
+  int32_t *acc = (int32_t *)result->data;
+  for (size_t i = 0; i < n; i++) {
+    acc[0] += data[i];
+  }
+}
+
+static void sum_tensor_f32(const Tensor *tensor, Tensor *result, size_t n) {
+  float_t *data = (float_t *)tensor->data;
+  float_t *acc = (float_t *)result->data;
+  for (size_t i = 0; i < n; i++) {
+    acc[0] += data[i];
+  }
+}
+
+Tensor *t_sum(const Tensor *tensor) {
+  size_t n = t_len(tensor);
+  Tensor *result = t_new(tensor->dtype, 1, (size_t[]){1});
+
+  tensor_sum_fn dtable[] = {
+      sum_tensor_u8,
+      sum_tensor_u32,
+      sum_tensor_i32,
+      sum_tensor_f32,
+  };
+  dtable[tensor->dtype](tensor, result, n);
+  return result;
 }

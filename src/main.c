@@ -1,4 +1,6 @@
 #include "math/tensor.h"
+#include "math/tensor_ops.h"
+#include "ml/loss.h"
 #include "ml/mlp.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -7,22 +9,14 @@ int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
 
-  Tensor *input = t_random(DTYPE_FLOAT32, 2, (size_t[]){1, 128});
-  t_print(input);
-  MLP *mlp = mlp_new(128);
-  mlp_append_layer(mlp, 256);
-  mlp_append_layer(mlp, 256);
-  mlp_append_layer(mlp, 128);
-  mlp_append_layer(mlp, 64);
-  mlp_append_layer(mlp, 32);
-  mlp_append_layer(mlp, 2);
+  Tensor *pred = t_zeros(DTYPE_FLOAT32, 2, (size_t[]){1, 4});
+  t_print(pred);
 
-  Tensor *output = mlp_forward(mlp, input);
-  if (output == NULL) {
-    fprintf(stderr, "error: MLP forward pass failed.\n");
-    mlp_free(mlp);
-    t_free(input);
-    return 1;
-  }
-  t_print(output);
+  Tensor *gt = t_zeros(DTYPE_FLOAT32, 2, (size_t[]){1, 4});
+  float el = 0.5;
+  t_set_element(gt, &el, (size_t[]){0, 1});
+  t_print(gt);
+
+  float mse = mse_loss(pred, gt);
+  printf("MSE Loss: %f\n", mse);
 }

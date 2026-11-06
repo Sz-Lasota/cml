@@ -24,6 +24,7 @@ typedef void *(*get_element_fn)(void *, size_t);
 typedef void (*set_element_fn)(void *, size_t, void *);
 typedef void (*print_element_fn)(const Tensor *, size_t *);
 typedef void (*fill_tensor_with_random_data)(Tensor *);
+typedef void (*fill_tensor_with_ones)(Tensor *);
 
 // TODO:
 //  - [ ] min, max, avg, std
@@ -54,4 +55,8 @@ void t_flatten(Tensor *tensor);
 
 void t_print(const Tensor *tensor);
 size_t t_len(const Tensor *tensor);
+
+// TODO: Add axis parameter
+typedef void (*tensor_sum_fn)(const Tensor *, Tensor *, size_t n);
+Tensor *t_sum(const Tensor *tensor);
 #endif // MATH_TENSOR_H
