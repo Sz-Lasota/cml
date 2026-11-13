@@ -29,8 +29,8 @@ static void add_scalar_i32(Tensor *t, void *scalar, size_t n) {
 }
 
 static void add_scalar_f32(Tensor *t, void *scalar, size_t n) {
-  float_t sc = *(float_t *)scalar;
-  float_t *data = (float_t *)t->data;
+  float sc = *(float *)scalar;
+  float *data = (float *)t->data;
   for (size_t i = 0; i < n; i++) {
     data[i] += sc;
   }
@@ -73,8 +73,8 @@ static void mul_scalar_i32(Tensor *t, void *scalar, size_t n) {
 }
 
 static void mul_scalar_f32(Tensor *t, void *scalar, size_t n) {
-  float_t sc = *(float_t *)scalar;
-  float_t *data = (float_t *)t->data;
+  float sc = *(float *)scalar;
+  float *data = (float *)t->data;
   for (size_t i = 0; i < n; i++) {
     data[i] *= sc;
   }
@@ -144,9 +144,9 @@ static void add_tensor_i32(const Tensor *t1, const Tensor *t2, Tensor *result) {
 }
 
 static void add_tensor_f32(const Tensor *t1, const Tensor *t2, Tensor *result) {
-  float_t *data1 = (float_t *)t1->data;
-  float_t *data2 = (float_t *)t2->data;
-  float_t *result_data = (float_t *)result->data;
+  float *data1 = (float *)t1->data;
+  float *data2 = (float *)t2->data;
+  float *result_data = (float *)result->data;
   size_t n = t_len(t1);
   for (size_t i = 0; i < n; i++) {
     result_data[i] = data1[i] + data2[i];
@@ -205,9 +205,9 @@ static void sub_tensor_i32(const Tensor *t1, const Tensor *t2, Tensor *result) {
 }
 
 static void sub_tensor_f32(const Tensor *t1, const Tensor *t2, Tensor *result) {
-  float_t *data1 = (float_t *)t1->data;
-  float_t *data2 = (float_t *)t2->data;
-  float_t *result_data = (float_t *)result->data;
+  float *data1 = (float *)t1->data;
+  float *data2 = (float *)t2->data;
+  float *result_data = (float *)result->data;
   size_t n = t_len(t1);
   for (size_t i = 0; i < n; i++) {
     result_data[i] = data1[i] - data2[i];
@@ -265,9 +265,9 @@ static void mul_tensor_i32(const Tensor *t1, const Tensor *t2, Tensor *result) {
   }
 }
 static void mul_tensor_f32(const Tensor *t1, const Tensor *t2, Tensor *result) {
-  float_t *data1 = (float_t *)t1->data;
-  float_t *data2 = (float_t *)t2->data;
-  float_t *result_data = (float_t *)result->data;
+  float *data1 = (float *)t1->data;
+  float *data2 = (float *)t2->data;
+  float *result_data = (float *)result->data;
   size_t n = t_len(t1);
   for (size_t i = 0; i < n; i++) {
     result_data[i] = data1[i] * data2[i];
@@ -350,10 +350,10 @@ static void matmul_tensor_f32(const Tensor *t1, const Tensor *t2,
   for (size_t i = 0; i < result->shape[0]; i++) {
     for (size_t j = 0; j < result->shape[1]; j++) {
 
-      float_t sum = 0;
+      float sum = 0;
       for (size_t k = 0; k < n; k++) {
-        sum += (*(float_t *)t_get_element(t1, (size_t[]){i, k})) *
-               (*(float_t *)t_get_element(t2, (size_t[]){k, j}));
+        sum += (*(float *)t_get_element(t1, (size_t[]){i, k})) *
+               (*(float *)t_get_element(t2, (size_t[]){k, j}));
       }
       t_set_element(result, &sum, (size_t[]){i, j});
     }

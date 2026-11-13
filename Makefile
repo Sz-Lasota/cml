@@ -1,5 +1,6 @@
 CC      := gcc
-CFLAGS  := -Wall -Wextra -Iinclude -Ivendors/unity/src
+CFLAGS  := -Wall -Wextra -Iinclude -Ivendors/unity/src 
+LDFLAGS := -lm
 
 SRC_DIR := src
 TEST_DIR := tests
@@ -25,7 +26,7 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
-	$(CC) $^ -o $@
+	$(CC) $^ -o $@ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)

@@ -47,8 +47,8 @@ void test_add_float32(void) {
   for (size_t i = 0; i < 2; i++) {
     for (size_t j = 0; j < 3; j++) {
       size_t idx[] = {i, j};
-      float_t t1_value = (float_t)i;
-      float_t t2_value = (float_t)j;
+      float t1_value = (float)i;
+      float t2_value = (float)j;
 
       t_set_element(t1, &t1_value, idx);
       t_set_element(t2, &t2_value, idx);
@@ -59,8 +59,8 @@ void test_add_float32(void) {
   for (size_t i = 0; i < 2; i++) {
     for (size_t j = 0; j < 3; j++) {
       size_t idx[] = {i, j};
-      float_t expected_value = (float_t)(i + j);
-      float_t actual_value = *(float_t *)t_get_element(result, idx);
+      float expected_value = (float)(i + j);
+      float actual_value = *(float *)t_get_element(result, idx);
       TEST_ASSERT_FLOAT_WITHIN(1e-6, expected_value, actual_value);
     }
   }
@@ -79,8 +79,8 @@ void test_mul_float32(void) {
   for (size_t i = 0; i < 2; i++) {
     for (size_t j = 0; j < 3; j++) {
       size_t idx[] = {i, j};
-      float_t t1_value = (float_t)i;
-      float_t t2_value = (float_t)j;
+      float t1_value = (float)i;
+      float t2_value = (float)j;
 
       t_set_element(t1, &t1_value, idx);
       t_set_element(t2, &t2_value, idx);
@@ -91,8 +91,8 @@ void test_mul_float32(void) {
   for (size_t i = 0; i < 2; i++) {
     for (size_t j = 0; j < 3; j++) {
       size_t idx[] = {i, j};
-      float_t expected_value = (float_t)(i * j);
-      float_t actual_value = *(float_t *)t_get_element(result, idx);
+      float expected_value = (float)(i * j);
+      float actual_value = *(float *)t_get_element(result, idx);
       TEST_ASSERT_FLOAT_WITHIN(1e-6, expected_value, actual_value);
     }
   }

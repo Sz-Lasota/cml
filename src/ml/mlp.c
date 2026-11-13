@@ -1,6 +1,7 @@
 #include "ml/mlp.h"
 #include "math/tensor.h"
 #include "math/tensor_ops.h"
+#include "ml/activation.h"
 #include <stdint.h>
 #include <stdio.h>
 
@@ -30,10 +31,15 @@ void mlp_free(MLP *mlp) {
   free(mlp);
 }
 
-Layer *layer_new(uint32_t input_size, uint32_t output_size) {
+Layer *layer_new(uint32_t input_size, uint32_t output_size,
+                 activation_fn act_fn) {
   Layer *layer = (Layer *)(malloc(sizeof(Layer)));
   layer->input_size = input_size;
   layer->output_size = output_size;
+  if (act_fn == NULL) {
+    fprintf(stderr, "error: Activation function cannot be null.\n");
+  }
+  layer->activation = act_fn;
 
   size_t weights_shape[2] = {input_size, output_size};
   layer->weights = t_random(DTYPE_FLOAT32, 2, weights_shape);
@@ -73,17 +79,18 @@ Tensor *layer_forward(Layer *layer, Tensor *input) {
     fprintf(stderr, "error: Adding bias failed.\n");
     return NULL;
   }
+  layer->activation(output_with_bias);
 
   return output_with_bias;
 }
 
-void mlp_append_layer(MLP *mlp, uint32_t neurons_count) {
+void mlp_append_layer(MLP *mlp, uint32_t neurons_count, activation_fn act_fn) {
   Layer *current_tail =
       mlp->layers_count > 0 ? mlp->layers[mlp->layers_count - 1] : NULL;
 
   Layer *layer = layer_new(current_tail == NULL ? mlp->input_size
                                                 : current_tail->output_size,
-                           neurons_count);
+                           neurons_count, act_fn);
 
   mlp->layers_count++;
   mlp->layers =
@@ -91,13 +98,14 @@ void mlp_append_layer(MLP *mlp, uint32_t neurons_count) {
   mlp->layers[mlp->layers_count - 1] = layer;
 }
 
-void mlp_insert_layer(MLP *mlp, uint32_t index, uint32_t neurons_count) {
+void mlp_insert_layer(MLP *mlp, uint32_t index, uint32_t neurons_count,
+                      activation_fn act_fn) {
   Layer *current_tail =
       mlp->layers_count > 0 ? mlp->layers[mlp->layers_count - 1] : NULL;
 
   Layer *layer = layer_new(current_tail == NULL ? mlp->input_size
                                                 : current_tail->output_size,
-                           neurons_count);
+                           neurons_count, act_fn);
 
   mlp->layers_count++;
   mlp->layers =

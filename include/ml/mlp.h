@@ -2,6 +2,7 @@
 #define ML_MLP_H
 
 #include "math/tensor.h"
+#include "ml/activation.h"
 #include <stdint.h>
 
 typedef struct {
@@ -9,6 +10,7 @@ typedef struct {
   uint32_t output_size;
   Tensor *weights;
   Tensor *biases;
+  activation_fn activation;
 } Layer;
 
 typedef struct {
@@ -17,15 +19,15 @@ typedef struct {
   uint32_t input_size;
 } MLP;
 
-Layer *layer_new(uint32_t input_size, uint32_t output_size);
+Layer *layer_new(uint32_t input_size, uint32_t output_size, activation_fn act_fn);
 void layer_free(Layer *layer);
 Tensor *layer_forward(Layer *layer, Tensor *input);
 
 MLP *mlp_new(uint32_t input_size);
 void mlp_free(MLP *mlp);
 
-void mlp_append_layer(MLP *mlp, uint32_t neurons_count);
-void mlp_insert_layer(MLP *mlp, uint32_t index, uint32_t neurons_count);
+void mlp_append_layer(MLP *mlp, uint32_t neurons_count, activation_fn act_fn);
+void mlp_insert_layer(MLP *mlp, uint32_t index, uint32_t neurons_count, activation_fn act_fn);
 void mlp_remove_layer(MLP *mlp, uint32_t index);
 void mlp_pop_layer(MLP *mlp);
 

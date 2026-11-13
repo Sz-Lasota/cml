@@ -28,10 +28,10 @@ static inline void random_bytes(void *buf, size_t len) {
   getrandom(buf, len, 0);
 }
 
-static inline float_t random_float() {
+static inline float random_float() {
   int32_t rand_int;
   random_bytes(&rand_int, sizeof(rand_int));
-  return (float_t)rand_int / (float_t)UINT32_MAX;
+  return (float)rand_int / (float)UINT32_MAX;
 }
 
 static void t_calc_stride(Tensor *t) {
@@ -90,7 +90,7 @@ static void arange_fill_i32(void *tdata, size_t range) {
 }
 
 static void arange_fill_f32(void *tdata, size_t range) {
-  float_t *data = (float_t *)tdata;
+  float *data = (float *)tdata;
   for (size_t i = 0; i < range; i++) {
     *data = i;
     data++;
@@ -128,7 +128,7 @@ static void fill_random_i32(Tensor *tensor) {
 }
 
 static void fill_random_f32(Tensor *tensor) {
-  float_t *data = (float_t *)tensor->data;
+  float *data = (float *)tensor->data;
   size_t len = t_len(tensor);
   for (size_t i = 0; i < len; i++) {
     data[i] = random_float();
@@ -160,7 +160,7 @@ static void fill_ones_i32(Tensor *tensor) {
 }
 
 static void fill_ones_f32(Tensor *tensor) {
-  float_t *data = (float_t *)tensor->data;
+  float *data = (float *)tensor->data;
   size_t len = t_len(tensor);
   for (size_t i = 0; i < len; i++) {
     data[i] = 1.0;
@@ -322,7 +322,7 @@ static void *get_element_u8(void *tdata, size_t idx) {
 }
 
 static void *get_element_f32(void *tdata, size_t idx) {
-  float_t *data = (float_t *)tdata;
+  float *data = (float *)tdata;
   return &data[idx];
 }
 
@@ -401,8 +401,8 @@ static void set_element_u8(void *tdata, size_t idx, void *element) {
 }
 
 static void set_element_f32(void *tdata, size_t idx, void *element) {
-  float_t *data = (float_t *)tdata;
-  data[idx] = *(float_t *)element;
+  float *data = (float *)tdata;
+  data[idx] = *(float *)element;
 }
 
 static void set_element_u32(void *tdata, size_t idx, void *element) {
@@ -504,7 +504,7 @@ static void print_element_i32(const Tensor *tensor, size_t *indices) {
 }
 
 static void print_element_f32(const Tensor *tensor, size_t *indices) {
-  printf(" %3.6f", *(float_t *)t_get_element(tensor, indices));
+  printf(" %3.6f", *(float *)t_get_element(tensor, indices));
 }
 
 static void t_print_row(const Tensor *tensor, uint32_t indent) {
@@ -599,8 +599,8 @@ static void sum_tensor_i32(const Tensor *tensor, Tensor *result, size_t n) {
 }
 
 static void sum_tensor_f32(const Tensor *tensor, Tensor *result, size_t n) {
-  float_t *data = (float_t *)tensor->data;
-  float_t *acc = (float_t *)result->data;
+  float *data = (float *)tensor->data;
+  float *acc = (float *)result->data;
   for (size_t i = 0; i < n; i++) {
     acc[0] += data[i];
   }
