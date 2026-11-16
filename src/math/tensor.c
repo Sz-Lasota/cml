@@ -502,7 +502,7 @@ void t_flatten(Tensor *tensor) {
 }
 
 void t_free(Tensor *tensor) {
-  if (tensor == NULL){
+  if (tensor == NULL) {
     return;
   }
   free(tensor->shape);
