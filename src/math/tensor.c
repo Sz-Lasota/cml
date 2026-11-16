@@ -249,7 +249,6 @@ Tensor *t_ones(DType type, size_t dims, size_t *shape) {
   };
   dtable[t->dtype](t);
 
-
   return t;
 }
 
@@ -316,6 +315,23 @@ Tensor *t_ones_like(const Tensor *tensor) {
 
   return t;
 }
+
+Tensor *t_copy(const Tensor *tensor) {
+  Tensor *t = malloc(sizeof(Tensor));
+  t->dtype = tensor->dtype;
+  t->dims = tensor->dims;
+  t->shape = malloc(t->dims * sizeof(size_t));
+  t->stride = malloc(t->dims * sizeof(size_t));
+
+  memcpy(t->stride, tensor->stride, t->dims * sizeof(size_t));
+  memcpy(t->shape, tensor->shape, t->dims * sizeof(size_t));
+
+  size_t mem_size = t_data_size(t);
+  t->data = malloc(mem_size);
+  memcpy(t->data, tensor->data, mem_size);
+  return t;
+}
+
 static void *get_element_u8(void *tdata, size_t idx) {
   uint8_t *data = (uint8_t *)tdata;
   return &data[idx];
@@ -465,8 +481,9 @@ void t_reshape(Tensor *tensor, size_t new_shape_len, int32_t *shape) {
   }
 
   if (new_capacity != old_capacity) {
-    printf("error: cannot reshape tensor! new cap: %ld, old cap: %ld\n",
-           new_capacity, old_capacity);
+    fprintf(stderr,
+            "error: cannot reshape tensor! new cap: %ld, old cap: %ld\n",
+            new_capacity, old_capacity);
     exit(EXIT_FAILURE);
   }
 
@@ -485,6 +502,9 @@ void t_flatten(Tensor *tensor) {
 }
 
 void t_free(Tensor *tensor) {
+  if (tensor == NULL){
+    return;
+  }
   free(tensor->shape);
   free(tensor->stride);
   free(tensor->data);

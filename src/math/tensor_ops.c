@@ -214,13 +214,12 @@ static void sub_tensor_f32(const Tensor *t1, const Tensor *t2, Tensor *result) {
   }
 }
 
-
 Tensor *t_sub_tensor(const Tensor *t1, const Tensor *t2) {
 
   if (!_t_is_same_shape(t1, t2)) {
     fprintf(
         stderr,
-        "error: Tensors must have the same shape and dtype for addition.\n");
+        "error: Tensors must have the same shape and dtype for subtraction.\n");
     return NULL;
   }
 
@@ -388,5 +387,22 @@ Tensor *t_matmul_tensor(const Tensor *t1, const Tensor *t2) {
   };
 
   dtable[t1->dtype](t1, t2, result);
+  return result;
+}
+
+Tensor *t_transpose(Tensor *tensor) {
+  if (tensor->dims != 2) {
+    fprintf(stderr, "error: transpose available only for 2d tensors.\n");
+    return NULL;
+  }
+  size_t new_shape[2] = {tensor->shape[1], tensor->shape[0]};
+  Tensor *result = t_new(tensor->dtype, 2, new_shape);
+
+  for (size_t i = 0; i < tensor->shape[0]; i++) {
+    for (size_t j = 0; j < tensor->shape[1]; j++) {
+      t_set_element(result, t_get_element(tensor, (size_t[]){i, j}),
+                    (size_t[]){j, i});
+    }
+  }
   return result;
 }

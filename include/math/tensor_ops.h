@@ -13,13 +13,15 @@ typedef void (*add_tensor_fn)(const Tensor *, const Tensor *, Tensor *);
 Tensor *t_add_tensor(const Tensor *t1, const Tensor *t2);
 
 typedef void (*sub_tensor_fn)(const Tensor *, const Tensor *, Tensor *);
-Tensor *t_sub_tensor(const Tensor* t1, const Tensor *t2);
+Tensor *t_sub_tensor(const Tensor *t1, const Tensor *t2);
 
 typedef void (*mul_tensor_fn)(const Tensor *, const Tensor *, Tensor *);
 Tensor *t_mul_tensor(const Tensor *t1, const Tensor *t2);
 
 typedef void (*matmul_tensor_fn)(const Tensor *, const Tensor *, Tensor *);
 Tensor *t_matmul_tensor(const Tensor *t1, const Tensor *t2);
+
+Tensor *t_transpose(Tensor *tensor);
 
 bool _t_is_same_shape(const Tensor *t1, const Tensor *t2);
 

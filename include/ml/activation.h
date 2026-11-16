@@ -4,5 +4,6 @@
 #include "math/tensor.h"
 typedef void (*activation_fn)(Tensor* output);
 void sigmoid_activation(Tensor* output);
+void linear_activation(Tensor* output);
 
 #endif // ML_ACTIVATION_H
