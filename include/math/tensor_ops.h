@@ -11,6 +11,7 @@ void t_multiply(Tensor *t, void *scalar);
 
 typedef void (*add_tensor_fn)(const Tensor *, const Tensor *, Tensor *);
 Tensor *t_add_tensor(const Tensor *t1, const Tensor *t2);
+Tensor *t_add_tensor_with_broadcast(const Tensor *t1, const Tensor *t2);
 
 typedef void (*sub_tensor_fn)(const Tensor *, const Tensor *, Tensor *);
 Tensor *t_sub_tensor(const Tensor *t1, const Tensor *t2);

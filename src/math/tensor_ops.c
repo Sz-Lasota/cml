@@ -174,6 +174,95 @@ Tensor *t_add_tensor(const Tensor *t1, const Tensor *t2) {
   return result;
 }
 
+static void add_tensor_u8_with_broadcast(const Tensor *t1, const Tensor *t2,
+                                         Tensor *result) {
+  uint8_t *data1 = (uint8_t *)t1->data;
+  uint8_t *data2 = (uint8_t *)t2->data;
+  uint8_t *result_data = (uint8_t *)result->data;
+  size_t n = t_len(t1);
+  size_t len_t2 = t_len(t2);
+  for (size_t i = 0; i < n; i++) {
+    result_data[i] = data1[i] + data2[i % len_t2];
+  }
+}
+
+static void add_tensor_u32_with_broadcast(const Tensor *t1, const Tensor *t2,
+                                          Tensor *result) {
+  uint32_t *data1 = (uint32_t *)t1->data;
+  uint32_t *data2 = (uint32_t *)t2->data;
+  uint32_t *result_data = (uint32_t *)result->data;
+  size_t n = t_len(t1);
+  size_t len_t2 = t_len(t2);
+  for (size_t i = 0; i < n; i++) {
+    result_data[i] = data1[i] + data2[i % len_t2];
+  }
+}
+
+static void add_tensor_i32_with_broadcast(const Tensor *t1, const Tensor *t2,
+                                          Tensor *result) {
+  int32_t *data1 = (int32_t *)t1->data;
+  int32_t *data2 = (int32_t *)t2->data;
+  int32_t *result_data = (int32_t *)result->data;
+  size_t n = t_len(t1);
+  size_t len_t2 = t_len(t2);
+  for (size_t i = 0; i < n; i++) {
+    result_data[i] = data1[i] + data2[i % len_t2];
+  }
+}
+
+static void add_tensor_f32_with_broadcast(const Tensor *t1, const Tensor *t2,
+                                          Tensor *result) {
+  float *data1 = (float *)t1->data;
+  float *data2 = (float *)t2->data;
+  float *result_data = (float *)result->data;
+  size_t n = t_len(t1);
+  size_t len_t2 = t_len(t2);
+  for (size_t i = 0; i < n; i++) {
+    result_data[i] = data1[i] + data2[i % len_t2];
+  }
+}
+
+Tensor *t_add_tensor_with_broadcast(const Tensor *t1, const Tensor *t2) {
+
+  if (t1->dtype != t2->dtype) {
+    fprintf(stderr, "error: dtype mismatch when adding with broadcast!\n");
+    return NULL;
+  }
+
+  if (t1->dims != t2->dims) {
+    fprintf(stderr, "error: shape mismatch when adding with broadcast!\n");
+    return NULL;
+  }
+
+  if (t1->dims == 0) {
+    fprintf(stderr, "error: 0d tensor cannot be added!\n");
+    return NULL;
+  }
+
+  if (t2->shape[0] != 1) {
+    fprintf(stderr, "error: adding with broadcast required shape[0] to be 1\n");
+    return NULL;
+  }
+
+  for (size_t i = 1; i < t1->dims; i++) {
+    if (t1->shape[i] != t2->shape[i]) {
+      fprintf(stderr, "error: shape mismatch when adding with broadcast!\n");
+      return NULL;
+    }
+  }
+
+  Tensor *result = t_zeros_like(t1);
+
+  add_tensor_fn dtable[] = {
+      add_tensor_u8_with_broadcast,
+      add_tensor_u32_with_broadcast,
+      add_tensor_i32_with_broadcast,
+      add_tensor_f32_with_broadcast,
+  };
+  dtable[t1->dtype](t1, t2, result);
+  return result;
+}
+
 static void sub_tensor_u8(const Tensor *t1, const Tensor *t2, Tensor *result) {
   uint8_t *data1 = (uint8_t *)t1->data;
   uint8_t *data2 = (uint8_t *)t2->data;
