@@ -1,8 +1,8 @@
 #ifndef ML_MLP_H
 #define ML_MLP_H
 
-#include "common.h"
 #include "math/tensor.h"
+#include "ml/dataset.h"
 #include "ml/activation.h"
 #include <stdint.h>
 

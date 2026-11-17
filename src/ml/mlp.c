@@ -2,6 +2,7 @@
 #include "math/tensor.h"
 #include "math/tensor_ops.h"
 #include "ml/activation.h"
+#include "ml/dataset.h"
 #include <stdint.h>
 #include <stdio.h>
 
@@ -306,7 +307,11 @@ void mlp_train(MLP *mlp, Dataset *ds, uint32_t epochs, uint32_t batch_size, floa
 
   for (uint32_t i = 0; i < epochs; i++) {
       // Get batch_size random examples from dataset
-      // Run mlp backward on it
+      Tensor *data = NULL; 
+      Tensor *label = NULL;
+      ds_get_batch(ds, batch_size, &data, &label);
 
+      // Run mlp backward on it
+      mlp_backward(mlp, data, label, lr);
   }
 }

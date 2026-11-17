@@ -1,7 +1,7 @@
 #ifndef DATA_MNIST_H
 #define DATA_MNIST_H
 
-#include "common.h"
+#include "ml/dataset.h"
 #define MNIST_IMAGE_W 28
 #define MNIST_IMAGE_H 28
 
