@@ -3,6 +3,7 @@
 #include "math/tensor_ops.h"
 #include "ml/activation.h"
 #include "ml/dataset.h"
+#include "ml/loss.h"
 #include <stdint.h>
 #include <stdio.h>
 
@@ -299,19 +300,28 @@ void mlp_backward(MLP *mlp, Tensor *input, Tensor *gt, float lr) {
   t_free(prev_delta);
 }
 
-void mlp_train(MLP *mlp, Dataset *ds, uint32_t epochs, uint32_t batch_size, float lr) {
+void mlp_train(MLP *mlp, Dataset *ds, uint32_t epochs, uint32_t batch_size,
+               float lr) {
   if (lr <= 0) {
     fprintf(stderr, "error: learning rate have to be positive!\n");
     return;
   }
 
   for (uint32_t i = 0; i < epochs; i++) {
-      // Get batch_size random examples from dataset
-      Tensor *data = NULL; 
-      Tensor *label = NULL;
-      ds_get_batch(ds, batch_size, &data, &label);
+    // Get batch_size random examples from dataset
+    Tensor *data = NULL;
+    Tensor *label = NULL;
+    ds_get_batch(ds, batch_size, &data, &label);
 
-      // Run mlp backward on it
-      mlp_backward(mlp, data, label, lr);
+    // Run mlp backward on it
+    mlp_backward(mlp, data, label, lr);
+    if (i % 100 == 0) {
+      Tensor *pred = mlp_forward(mlp, data);
+      float loss = mse_loss(pred, label);
+      t_free(pred);
+      printf("Epoch %d: Loss %3.6f\n", i, loss);
+    }
+    t_free(data);
+    t_free(label);
   }
 }
