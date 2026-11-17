@@ -51,6 +51,7 @@ void t_get_tensor(const Tensor *tensor_in, Tensor *tensor_out,
                   size_t indices_len, size_t *indices);
 
 void t_set_element(Tensor *tensor, void *element, size_t *indices);
+void t_set_tensor(Tensor *tensor_dst, Tensor *tensor_src, size_t index);
 void t_reshape(Tensor *tensor, size_t new_shape_len, int32_t *shape);
 void t_flatten(Tensor *tensor);
 

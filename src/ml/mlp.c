@@ -72,7 +72,7 @@ Tensor *layer_forward(Layer *layer, Tensor *input) {
     return NULL;
   }
 
-  Tensor *output_with_bias = t_add_tensor(output, layer->biases);
+  Tensor *output_with_bias = t_add_tensor_with_broadcast(output, layer->biases);
 
   t_free(output);
   if (output_with_bias == NULL) {
@@ -296,4 +296,17 @@ void mlp_backward(MLP *mlp, Tensor *input, Tensor *gt, float lr) {
   t_free(pdw);
   t_free(pdb);
   t_free(prev_delta);
+}
+
+void mlp_train(MLP *mlp, Dataset *ds, uint32_t epochs, uint32_t batch_size, float lr) {
+  if (lr <= 0) {
+    fprintf(stderr, "error: learning rate have to be positive!\n");
+    return;
+  }
+
+  for (uint32_t i = 0; i < epochs; i++) {
+      // Get batch_size random examples from dataset
+      // Run mlp backward on it
+
+  }
 }

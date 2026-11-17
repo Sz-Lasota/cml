@@ -45,6 +45,7 @@ static void t_calc_stride(Tensor *t) {
 static size_t t_data_size(const Tensor *t) {
   size_t mem_size = dtype_size(t->dtype);
   for (size_t i = 0; i < t->dims; i++) {
+
     mem_size *= t->shape[i];
   }
   return mem_size;
@@ -449,6 +450,33 @@ void t_set_element(Tensor *tensor, void *element, size_t *indices) {
       set_element_f32,
   };
   dtable[tensor->dtype](tensor->data, idx, element);
+}
+
+void t_set_tensor(Tensor *tensor_dst, Tensor *tensor_src, size_t index) {
+  if (tensor_dst->dtype != tensor_src->dtype) {
+    fprintf(stderr, "error: source tensor have to have the same dtype\n");
+    return;
+  }
+
+  if (tensor_dst->dims != tensor_src->dims + 1) {
+    fprintf(stderr, "error: source tensor have to has one less dimension than "
+                    "destination\n");
+    return;
+  }
+
+  for (size_t i = 0; i < tensor_src->dims; i++) {
+    if (tensor_src->shape[i] != tensor_dst->shape[i + 1]) {
+      fprintf(stderr,
+              "error: shape mismatch, tensor_src->shape[%zu] != "
+              "tensor_dst->shape[%zu]",
+              i, i + 1);
+      return;
+    }
+  }
+
+  size_t data_size = t_data_size(tensor_src);
+  size_t byte_offset = index * data_size;
+  memcpy(tensor_dst->data + byte_offset, tensor_src->data, data_size);
 }
 
 void t_reshape(Tensor *tensor, size_t new_shape_len, int32_t *shape) {

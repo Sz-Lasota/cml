@@ -1,6 +1,7 @@
 #ifndef ML_MLP_H
 #define ML_MLP_H
 
+#include "common.h"
 #include "math/tensor.h"
 #include "ml/activation.h"
 #include <stdint.h>
@@ -35,4 +36,6 @@ void mlp_pop_layer(MLP *mlp);
 
 Tensor *mlp_forward(MLP *mlp, Tensor *input);
 void mlp_backward(MLP *mlp, Tensor *input, Tensor *gt, float lr);
+
+void mlp_train(MLP *mlp, Dataset *ds, uint32_t epochs, uint32_t batch_size, float lr);
 #endif // ML_MLP_H
