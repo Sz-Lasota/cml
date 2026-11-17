@@ -358,7 +358,7 @@ void *t_get_element(const Tensor *tensor, size_t *indices) {
   for (uint32_t i = 0; i < tensor->dims; i++) {
     size_t traverse = indices[i];
     if (traverse >= tensor->shape[i]) {
-      printf("error: index out of bounds for tensor\n");
+      printf("error: index out of bounds for get element\n");
       exit(EXIT_FAILURE);
     }
     idx += traverse * tensor->stride[i];
@@ -384,7 +384,7 @@ void t_get_tensor(const Tensor *tensor_in, Tensor *tensor_out,
   for (size_t i = 0; i < indices_len; i++) {
     size_t traverse = indices[i];
     if (traverse >= tensor_in->shape[i]) {
-      printf("error: index out of bounds for tensor\n");
+      printf("error: index out of bounds for get tensor\n");
       exit(EXIT_FAILURE);
     }
     offset += traverse * tensor_in->stride[i];
@@ -437,7 +437,7 @@ void t_set_element(Tensor *tensor, void *element, size_t *indices) {
   for (uint32_t i = 0; i < tensor->dims; i++) {
     size_t traverse = indices[i];
     if (traverse >= tensor->shape[i]) {
-      printf("error: index out of bounds for tensor\n");
+      printf("error: index out of bounds for set element\n");
       exit(EXIT_FAILURE);
     }
     idx += traverse * tensor->stride[i];
