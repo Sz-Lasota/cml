@@ -342,3 +342,27 @@ void mlp_train(MLP *mlp, Dataset *ds, uint32_t epochs, uint32_t batch_size,
     t_free(label);
   }
 }
+
+float mlp_accuracy(MLP *mlp, Dataset *test_ds) {
+  Tensor *logits = mlp_forward(mlp, test_ds->samples);
+  Tensor *preds = t_argmax(logits);
+  t_free(logits);
+
+  Tensor *gt_logits = test_ds->labels;
+  Tensor *gt = t_argmax(gt_logits);
+
+  if (gt->dims != preds->dims) {
+    fprintf(stderr, "error: unexpected shape of ground truth");
+    exit(EXIT_FAILURE);
+  }
+  size_t denominator = t_len(gt);
+  size_t nominator = 0;
+  for (size_t i = 0; i < gt->shape[0]; i++) {
+    uint32_t gt_digit = *(uint32_t *)t_get_element(gt, (size_t[]){i});
+    uint32_t pred_digit = *(uint32_t *)t_get_element(preds, (size_t[]){i});
+    if (gt_digit == pred_digit) {
+      nominator++;
+    }
+  }
+  return (float)nominator / denominator;
+}

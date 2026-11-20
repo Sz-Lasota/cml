@@ -14,15 +14,7 @@
 
 #define TEST_PICTURES 5
 
-int main(void) {
-    Tensor *input = t_random(DTYPE_UINT8, 3, (size_t[]){4, 4, 4});
-    t_print(input);
-
-    Tensor *argmax = t_argmax(input); 
-    t_print(argmax);
-}
-
-int main2(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   if (argc != 3 && argc != 5) {
     fprintf(stderr, "Usage: %s <image_file> <label_file>\n", argv[0]);
     return 1;
@@ -74,8 +66,18 @@ int main2(int argc, char *argv[]) {
   mlp_append_layer(mlp, 16, sigmoid_activation);
   mlp_append_layer(mlp, 10, sigmoid_activation);
 
+  if (vs != NULL) {
+      float accuracy = mlp_accuracy(mlp, vs);
+      printf("Accuracy before training on test set: %3.6f\n", accuracy);
+  }
+
   printf("Training start\n");
   mlp_train(mlp, ds, 5000, 256, 1.0, vs);
   printf("Training finished\n");
+
+  if (vs != NULL) {
+      float accuracy = mlp_accuracy(mlp, vs);
+      printf("Accuracy after training on test set: %3.6f\n", accuracy);
+  }
   return 0;
 }
