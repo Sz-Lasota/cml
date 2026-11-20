@@ -37,5 +37,5 @@ void mlp_pop_layer(MLP *mlp);
 Tensor *mlp_forward(MLP *mlp, Tensor *input);
 void mlp_backward(MLP *mlp, Tensor *input, Tensor *gt, float lr);
 
-void mlp_train(MLP *mlp, Dataset *ds, uint32_t epochs, uint32_t batch_size, float lr);
+void mlp_train(MLP *mlp, Dataset *ds, uint32_t epochs, uint32_t batch_size, float lr, Dataset *val_set);
 #endif // ML_MLP_H

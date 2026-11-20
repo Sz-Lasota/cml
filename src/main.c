@@ -15,12 +15,22 @@
 #define TEST_PICTURES 5
 
 int main(int argc, char *argv[]) {
-  if (argc != 3) {
+  if (argc != 3 && argc != 5) {
     fprintf(stderr, "Usage: %s <image_file> <label_file>\n", argv[0]);
     return 1;
   }
+
   const char *image_filename = argv[1];
   const char *label_filename = argv[2];
+
+  const char *image_test_set_path = NULL;
+  const char *label_test_set_path = NULL;
+
+  if (argc == 5) {
+    image_test_set_path = argv[3];
+    label_test_set_path = argv[4];
+  }
+
   srand(time(NULL));
 
   Tensor images;
@@ -37,38 +47,27 @@ int main(int argc, char *argv[]) {
     printf("\n");
   }
 
+  // Initialize training set
   Dataset *ds = malloc(sizeof(Dataset));
-  Tensor *fr = malloc(sizeof(Tensor));
   load_mnist(image_filename, label_filename, ds);
   ds_init_pool(ds);
 
-  t_get_tensor(ds->labels, fr, 1, (size_t[]){0});
-  t_print(fr);
+  // Initialize validation set
+  Dataset *vs = NULL;
+  if (image_test_set_path != NULL && label_test_set_path != NULL) {
+    vs = malloc(sizeof(Dataset));
+    load_mnist(image_test_set_path, label_test_set_path, vs);
+    ds_init_pool(vs);
+  }
 
+  // Create MLP network
   MLP *mlp = mlp_new(28 * 28);
   mlp_append_layer(mlp, 32, sigmoid_activation);
   mlp_append_layer(mlp, 16, sigmoid_activation);
   mlp_append_layer(mlp, 10, sigmoid_activation);
 
-  Tensor *test_img = malloc(sizeof(Tensor));
-  Tensor *test_ds = t_zeros(DTYPE_FLOAT32, 2, (size_t[]){TEST_PICTURES, 28 * 28});
-
-  for (uint32_t i = 0; i < TEST_PICTURES; i++) {
-    t_get_tensor(ds->samples, test_img, 1, (size_t[]){i});
-    t_set_tensor(test_ds, test_img, i);
-  }
-
-  printf("Initial answer:\n");
-  Tensor *init_ans = mlp_forward(mlp, test_ds);
-  t_print(init_ans);
-
   printf("Training start\n");
-  mlp_train(mlp, ds, 5000, 256, 1.0);
+  mlp_train(mlp, ds, 5000, 256, 1.0, vs);
   printf("Training finished\n");
-
-  printf("After answer:\n");
-  Tensor *after_ans = mlp_forward(mlp, test_ds);
-  t_print(after_ans);
-
   return 0;
 }
