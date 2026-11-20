@@ -61,4 +61,7 @@ size_t t_len(const Tensor *tensor);
 // TODO: Add axis parameter
 typedef void (*tensor_sum_fn)(const Tensor *, Tensor *, size_t n);
 Tensor *t_sum(const Tensor *tensor);
+
+typedef void (*tensor_argmax_fn)(const Tensor *, Tensor *);
+Tensor *t_argmax(const Tensor *tensor);
 #endif // MATH_TENSOR_H

@@ -667,3 +667,167 @@ Tensor *t_sum(const Tensor *tensor) {
   dtable[tensor->dtype](tensor, result, n);
   return result;
 }
+
+static void argmax_tensor_u8(const Tensor *tensor, Tensor *result) {
+  uint8_t *data = (uint8_t *)tensor->data;
+  uint32_t *argmax = (uint32_t *)result->data;
+  size_t dn = t_len(tensor);
+  size_t rn = t_len(result);
+  size_t adv_len = tensor->shape[tensor->dims - 1];
+  size_t insert_cursor = 0;
+
+  uint8_t current_max = 0;
+  size_t current_max_idx = 0;
+  size_t read_cursor = 0;
+
+  for (size_t i = 0; i < dn; i++) {
+    if (data[i] > current_max) {
+      current_max = data[i];
+      current_max_idx = read_cursor;
+    }
+    read_cursor++;
+
+    if (read_cursor < adv_len) {
+      continue;
+    }
+    if (insert_cursor >= rn) {
+      fprintf(stderr, "error: insert cursor bigger than result tensor!");
+      exit(EXIT_FAILURE);
+    }
+
+    argmax[insert_cursor] = current_max_idx;
+
+    insert_cursor++;
+    current_max = 0;
+    current_max_idx = 0;
+    read_cursor = 0;
+  }
+}
+
+static void argmax_tensor_i32(const Tensor *tensor, Tensor *result) {
+  int32_t *data = (int32_t *)tensor->data;
+  uint32_t *argmax = (uint32_t *)result->data;
+  size_t dn = t_len(tensor);
+  size_t rn = t_len(result);
+  size_t adv_len = tensor->shape[tensor->dims - 1];
+  size_t insert_cursor = 0;
+
+  int32_t current_max = 0;
+  size_t current_max_idx = 0;
+  size_t read_cursor = 0;
+
+  for (size_t i = 0; i < dn; i++) {
+    if (data[i] > current_max) {
+      current_max = data[i];
+      current_max_idx = read_cursor;
+    }
+    read_cursor++;
+
+    if (read_cursor < adv_len) {
+      continue;
+    }
+    if (insert_cursor >= rn) {
+      fprintf(stderr, "error: insert cursor bigger than result tensor!");
+      exit(EXIT_FAILURE);
+    }
+
+    argmax[insert_cursor] = current_max_idx;
+
+    insert_cursor++;
+    current_max = 0;
+    current_max_idx = 0;
+    read_cursor = 0;
+  }
+}
+static void argmax_tensor_u32(const Tensor *tensor, Tensor *result) {
+  uint32_t *data = (uint32_t *)tensor->data;
+  uint32_t *argmax = (uint32_t *)result->data;
+  size_t dn = t_len(tensor);
+  size_t rn = t_len(result);
+  size_t adv_len = tensor->shape[tensor->dims - 1];
+  size_t insert_cursor = 0;
+
+  uint32_t current_max = 0;
+  size_t current_max_idx = 0;
+  size_t read_cursor = 0;
+
+  for (size_t i = 0; i < dn; i++) {
+    if (data[i] > current_max) {
+      current_max = data[i];
+      current_max_idx = read_cursor;
+    }
+    read_cursor++;
+
+    if (read_cursor < adv_len) {
+      continue;
+    }
+    if (insert_cursor >= rn) {
+      fprintf(stderr, "error: insert cursor bigger than result tensor!\n");
+      exit(EXIT_FAILURE);
+    }
+
+    argmax[insert_cursor] = current_max_idx;
+
+    insert_cursor++;
+    current_max = 0;
+    current_max_idx = 0;
+    read_cursor = 0;
+  }
+}
+static void argmax_tensor_f32(const Tensor *tensor, Tensor *result) {
+  float *data = (float *)tensor->data;
+  uint32_t *argmax = (uint32_t *)result->data;
+  size_t dn = t_len(tensor);
+  size_t rn = t_len(result);
+  size_t adv_len = tensor->shape[tensor->dims - 1];
+  size_t insert_cursor = 0;
+
+  float current_max = 0;
+  size_t current_max_idx = 0;
+  size_t read_cursor = 0;
+
+  for (size_t i = 0; i < dn; i++) {
+    if (data[i] > current_max) {
+      current_max = data[i];
+      current_max_idx = read_cursor;
+    }
+    read_cursor++;
+
+    if (read_cursor < adv_len) {
+      continue;
+    }
+    if (insert_cursor >= rn) {
+      fprintf(stderr, "error: insert cursor bigger than result tensor!\n");
+      exit(EXIT_FAILURE);
+    }
+
+    argmax[insert_cursor] = current_max_idx;
+
+    insert_cursor++;
+    current_max = 0;
+    current_max_idx = 0;
+    read_cursor = 0;
+  }
+}
+Tensor *t_argmax(const Tensor *tensor) {
+  if (tensor->dims == 1) {
+    fprintf(stderr,
+            "error: argmax for one dimensional tensor not implemented yet\n");
+    exit(EXIT_FAILURE);
+  }
+  size_t *res_shape = malloc(sizeof(size_t) * (tensor->dims - 1));
+  for (size_t i = 0; i < tensor->dims - 1; i++) {
+    res_shape[i] = tensor->shape[i];
+  }
+  Tensor *result = t_zeros(DTYPE_UINT32, tensor->dims - 1, res_shape);
+  free(res_shape);
+
+  tensor_argmax_fn dtable[] = {
+      argmax_tensor_u8,
+      argmax_tensor_u32,
+      argmax_tensor_i32,
+      argmax_tensor_f32,
+  };
+  dtable[tensor->dtype](tensor, result);
+  return result;
+}

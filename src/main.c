@@ -14,7 +14,15 @@
 
 #define TEST_PICTURES 5
 
-int main(int argc, char *argv[]) {
+int main(void) {
+    Tensor *input = t_random(DTYPE_UINT8, 3, (size_t[]){4, 4, 4});
+    t_print(input);
+
+    Tensor *argmax = t_argmax(input); 
+    t_print(argmax);
+}
+
+int main2(int argc, char *argv[]) {
   if (argc != 3 && argc != 5) {
     fprintf(stderr, "Usage: %s <image_file> <label_file>\n", argv[0]);
     return 1;
